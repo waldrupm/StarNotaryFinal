@@ -80,8 +80,10 @@ it('can add the star name and star symbol properly', async() => {
     let starId = 6;
     let user1 = accounts[1];
     await instance.createStar("Great Star", starId, {from: user1});
-    let contractName = instance.tokenName.call();
-    let contractSymbol = instance.tokenSymbol.call();
+    let contractName = await instance.tokenName.call();
+    let contractSymbol = await instance.tokenSymbol.call();
+    console.log(contractName);
+    console.log(contractSymbol);
     assert.equal(contractName, "CryptoStar");
     assert.equal(contractSymbol, "CST");
     // 1. create a Star with different tokenId

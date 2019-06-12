@@ -14,17 +14,22 @@ contract StarNotary is ERC721 {
     // Implement Task 1 Add a name and symbol properties
     // name: Is a short name to your token
     // symbol: Is a short string like 'USD' -> 'American Dollar'
-    string public tokenName = "CryptoStar";
-    string public tokenSymbol = "CST";
-    
-    
+    string private _tokenName = "CryptoStar";
+    string private _tokenSymbol = "CST";
+
+    function name() public view returns (string memory) {
+        return _tokenName;
+    }
+
+    function symbol() public view returns (string memory) {
+        return _tokenSymbol;
+    }
 
     // mapping the Star with the Owner Address
     mapping(uint256 => Star) public tokenIdToStarInfo;
     // mapping the TokenId and price
     mapping(uint256 => uint256) public starsForSale;
 
-    
     // Create Star using the Struct
     function createStar(string memory _name, uint256 _tokenId) public { // Passing the name and tokenId as a parameters
         Star memory newStar = Star(_name); // Star is an struct so we are creating a new Star
@@ -34,7 +39,7 @@ contract StarNotary is ERC721 {
 
     // Putting an Star for sale (Adding the star tokenid into the mapping starsForSale, first verify that the sender is the owner)
     function putStarUpForSale(uint256 _tokenId, uint256 _price) public {
-        require(ownerOf(_tokenId) == msg.sender, "You can't sale the Star you don't owned");
+        require(ownerOf(_tokenId) == msg.sender, "You can't sell a Star you don't own");
         starsForSale[_tokenId] = _price;
     }
 
@@ -49,8 +54,10 @@ contract StarNotary is ERC721 {
         uint256 starCost = starsForSale[_tokenId];
         address ownerAddress = ownerOf(_tokenId);
         require(msg.value > starCost, "You need to have enough Ether");
-        _transferFrom(ownerAddress, msg.sender, _tokenId); // We can't use _addTokenTo or_removeTokenFrom functions, now we have to use _transferFrom
-        address payable ownerAddressPayable = _make_payable(ownerAddress); // We need to make this conversion to be able to use transfer() function to transfer ethers
+        // We can't use _addTokenTo or_removeTokenFrom functions, now we have to use _transferFrom
+        _transferFrom(ownerAddress, msg.sender, _tokenId);
+        address payable ownerAddressPayable = _make_payable(ownerAddress);
+        // We need to make this conversion to be able to use transfer() function to transfer ethers
         ownerAddressPayable.transfer(starCost);
         if(msg.value > starCost) {
             msg.sender.transfer(msg.value - starCost);
@@ -72,7 +79,7 @@ contract StarNotary is ERC721 {
         //4. Use _transferFrom function to exchange the tokens.
         address owner1 = ownerOf(_tokenId1);
         address owner2 = ownerOf(_tokenId2);
-        require(msg.sender == owner1 || msg.sender == owner2, "Does now own either token");
+        require(msg.sender == owner1 || msg.sender == owner2, "Does not own either token");
         _transferFrom(owner1, owner2, _tokenId1);
         _transferFrom(owner2, owner1, _tokenId2);
     }
